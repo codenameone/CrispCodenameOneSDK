@@ -1,6 +1,12 @@
+![Crisp](https://raw.githubusercontent.com/crisp-im/crisp-sdk-android/master/docs/img/logo_blue.png)
+
+Chat with app users, integrate your favorite tools, and deliver a great customer experience.
+
 # Crisp Codename One SDK
 
 This cn1lib adds support for [Crisp](http://crisp.chat/) chat and client API directly from Codename One Applications. The library wraps JavaScript/HTML API directly instead of wrapping the native libraries. The reason for this is that at this time it's exactly what the native libraries are doing so there would be no advantage to wrapping them. However, this approach means that this cn1lib works on the simulator and on all of Codename One's suppoted platforms seamlessly.
+
+This code is based on the source code of Crisps native Android Integration [here](https://github.com/crisp-im/crisp-sdk-android). 
 
 ## Usage
 
@@ -23,6 +29,14 @@ private void bindCrispToForm(Form f) {
 Notice that `init` is required to create the instance of `Crisp` which is a singleton. However, the call to `init` is asynchronous as it creates the webview through which the JavaScript calls are made.
 
 ``bindFab` creates a `FloatingActionButton` with a chat icon that launches the Crisp UI. Notice that you can invoke `openChat()` directly to launch that UI manually. 
+
+## Get your website ID
+
+Your website ID can be found in the Crisp App URL:
+
+    https://app.crisp.chat/website/[WEBISTE_ID]/inbox/
+
+Crisp Website ID is an UUID like e30a04ee-f81c-4935-b8d8-5fa55831b1c0
 
 ## API's
 
