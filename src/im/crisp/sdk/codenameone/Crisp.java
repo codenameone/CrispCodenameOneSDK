@@ -56,44 +56,33 @@ public class Crisp {
             tokenId = websiteId + System.currentTimeMillis();
             Preferences.set("crisp-token-id", tokenId);
         }
-        try {
-            chatForm = new Form(new BorderLayout());
-            cmp = new BrowserComponent();
-            cmp.setProperty("UseWideViewPort", true);
-            cmp.setProperty("LoadWithOverviewMode", true);
-            cmp.setProperty("DatabaseEnabled", true);
-            cmp.setProperty("BuiltInZoomControls", true);
-            cmp.setProperty("DisplayZoomControls", false);
-            cmp.setProperty("WebContentsDebuggingEnabled", true);
-            cmp.setFireCallbacksOnEdt(true);
-            cmp.setURLHierarchy("/index.html");
-            cmp.addWebEventListener(BrowserComponent.onLoad, e -> {
-                if (getTokenId() != null && !getTokenId().isEmpty()) {
-                    cmp.execute("window.CRISP_TOKEN_ID = \"" + getTokenId() + "\";");
+        chatForm = new Form(new BorderLayout());
+
+        String w = getProperty("BrowserComponent.useWKWebView", null);
+        setProperty("BrowserComponent.useWKWebView", "true");
+        cmp = new BrowserComponent();
+        cmp.setProperty("UseWideViewPort", true);
+        cmp.setProperty("LoadWithOverviewMode", true);
+        cmp.setProperty("DatabaseEnabled", true);
+        cmp.setProperty("BuiltInZoomControls", true);
+        cmp.setProperty("DisplayZoomControls", false);
+        cmp.setProperty("WebContentsDebuggingEnabled", true);
+        cmp.setFireCallbacksOnEdt(true);
+        cmp.setURL("https://go.crisp.chat/chat/embed/?website_id=" + websiteId);
+        cmp.addBrowserNavigationCallback(new BrowserNavigationCallback() {
+            @Override
+            public boolean shouldNavigate(String url) {
+                if(!url.startsWith("file")) {
+                    execute(url);
+                    return false;
                 }
-
-                cmp.execute("window.CRISP_WEBSITE_ID = \"" + websiteId + "\";");
-
-                cmp.execute("initialize()");
-                onLoaded.actionPerformed(new ActionEvent(Crisp.this));
-
-            });
-            cmp.addBrowserNavigationCallback(new BrowserNavigationCallback() {
-                @Override
-                public boolean shouldNavigate(String url) {
-                    if(!url.startsWith("file")) {
-                        execute(url);
-                        return false;
-                    }
-                    return true;
-                }
-            });
-            chatForm.add(CENTER, cmp);
-            chatForm.getToolbar().setBackCommand("", Toolbar.BackCommandPolicy.AS_ARROW,
-                e ->  previousForm.showBack());
-        } catch(IOException err) {
-            log(err);
-        }
+                return true;
+            }
+        });
+        chatForm.add(CENTER, cmp);
+        chatForm.getToolbar().setBackCommand("", Toolbar.BackCommandPolicy.AS_ARROW,
+            e ->  previousForm.showBack());
+        setProperty("BrowserComponent.useWKWebView", w);
     }
 
     public static void init(String websiteId, ActionListener onLoaded) {
