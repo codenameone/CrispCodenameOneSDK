@@ -61,6 +61,7 @@ public class Crisp {
         String w = getProperty("BrowserComponent.useWKWebView", null);
         setProperty("BrowserComponent.useWKWebView", "true");
         cmp = new BrowserComponent();
+        cmp.addWebEventListener(BrowserComponent.onLoad, onLoaded);
         cmp.setProperty("UseWideViewPort", true);
         cmp.setProperty("LoadWithOverviewMode", true);
         cmp.setProperty("DatabaseEnabled", true);
