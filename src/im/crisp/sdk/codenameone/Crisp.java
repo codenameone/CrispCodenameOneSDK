@@ -25,6 +25,7 @@ package im.crisp.sdk.codenameone;
 
 import com.codename1.components.FloatingActionButton;
 import com.codename1.io.Preferences;
+import com.codename1.io.Util;
 import com.codename1.ui.BrowserComponent;
 import com.codename1.ui.FontImage;
 import com.codename1.ui.Form;
@@ -86,6 +87,66 @@ public class Crisp {
         setProperty("BrowserComponent.useWKWebView", w);
     }
 
+    private Crisp(Builder b) {
+        instance = this;
+        this.websiteId = b.websiteId;
+        tokenId = Preferences.get("crisp-token-id", (String)null);
+        if(tokenId == null) {
+            tokenId = websiteId + System.currentTimeMillis();
+            Preferences.set("crisp-token-id", tokenId);
+        }
+        chatForm = new Form(new BorderLayout());
+
+        String w = getProperty("BrowserComponent.useWKWebView", null);
+        setProperty("BrowserComponent.useWKWebView", "true");
+        cmp = new BrowserComponent();
+        cmp.setProperty("UseWideViewPort", true);
+        cmp.setProperty("LoadWithOverviewMode", true);
+        cmp.setProperty("DatabaseEnabled", true);
+        cmp.setProperty("BuiltInZoomControls", true);
+        cmp.setProperty("DisplayZoomControls", false);
+        cmp.setProperty("WebContentsDebuggingEnabled", true);
+        cmp.setFireCallbacksOnEdt(true);
+        
+        String url = "https://go.crisp.chat/chat/embed/?website_id=" + websiteId;
+        
+        if(b.email != null) {
+            url += "&user_email=" + Util.encodeUrl(b.email);
+        }
+
+        if(b.avatar != null) {
+            url += "&user_avatar=" + Util.encodeUrl(b.avatar);
+        }
+        
+        if(b.nickname != null) {
+            url += "&user_nickname=" + Util.encodeUrl(b.nickname);
+        }
+
+        if(b.phone != null) {
+            url += "&user_phone=" + Util.encodeUrl(b.phone);
+        }
+
+        cmp.setURL(url);
+        cmp.addBrowserNavigationCallback(new BrowserNavigationCallback() {
+            @Override
+            public boolean shouldNavigate(String url) {
+                if(!url.startsWith("file")) {
+                    execute(url);
+                    return false;
+                }
+                return true;
+            }
+        });
+        chatForm.add(CENTER, cmp);
+        chatForm.getToolbar().setBackCommand("", Toolbar.BackCommandPolicy.AS_ARROW,
+            e ->  previousForm.showBack());
+        setProperty("BrowserComponent.useWKWebView", w);
+    }
+    
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public static void init(String websiteId, ActionListener onLoaded) {
         instance = new Crisp(websiteId, onLoaded);
     }
@@ -94,35 +155,76 @@ public class Crisp {
         return instance;
     }
 
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public void setTokenId(String tokenId) {
         this.tokenId = tokenId;
     }
 
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public String getTokenId() {
         return tokenId;
     }
 
+    /**
+     * Builder pattern for Crisp instances. Until build is invoked instance 
+     * will be null.
+     */
+    public static Builder init(String websiteId) {
+        Builder b = new Builder();
+        b.websiteId = websiteId;
+        return b;
+    }
 
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public void setEmail(String email) {
         cmp.execute("window.$crisp.push([\"set\", \"user:email\", [\"" + email + "\"]])");
     }
 
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public void setNickname(String nickname) {
         cmp.execute("window.$crisp.push([\"set\", \"user:nickname\", [\"" + nickname + "\"]])");
     }
 
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public void setPhone(String phone) {
         cmp.execute("window.$crisp.push([\"set\", \"user:phone\", [\"" + phone + "\"]])");
     }
 
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public void setAvatar(String avatar) {
         cmp.execute("window.$crisp.push([\"set\", \"user:avatar\", [\"" + avatar + "\"]])");
     }
 
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public void setData(String key, String value) {
         cmp.execute("window.$crisp.push([\"set\", \"session:data\", [\"" + key + "\", \"" + value + "\"]])");
     }
 
+    /**
+     * @deprecated this API doesn't work properly in the JavaScript port. You should
+     * use {@link #init(java.lang.String)} instead
+     */
     public void setSegments(String segment) {
         cmp.execute("window.$crisp.push([\"set\", \"session:segments\", [[\"" + segment + "\"]]])");
     }
@@ -147,5 +249,47 @@ public class Crisp {
     
     public void bindFab(Form f) {
         chatFab().bindFabToContainer(f);
+    }
+    
+    
+    /**
+     * The builder class is used to create an instance of the crisp object in 
+     * a portable way
+     */
+    public static class Builder {
+        private String websiteId;
+        private String email;
+        private String phone;
+        private String nickname;
+        private String avatar;
+        
+        public Builder websiteId(String websiteId) {
+            this.websiteId = websiteId;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+        
+        public Builder phone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+        
+        public Builder nickname(String nickname) {
+            this.nickname = nickname;
+            return this;
+        }
+        
+        public Builder avatar(String avatar) {
+            this.avatar = avatar;
+            return this;
+        }
+        
+        public Crisp build() {
+            return new Crisp(this);
+        }
     }
 }
