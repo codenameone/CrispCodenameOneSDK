@@ -24,6 +24,7 @@
 package im.crisp.sdk.codenameone;
 
 import com.codename1.components.FloatingActionButton;
+import com.codename1.io.Log;
 import com.codename1.io.Preferences;
 import com.codename1.io.Util;
 import com.codename1.ui.BrowserComponent;
@@ -74,7 +75,7 @@ public class Crisp {
         cmp.addBrowserNavigationCallback(new BrowserNavigationCallback() {
             @Override
             public boolean shouldNavigate(String url) {
-                if(!url.startsWith("file")) {
+                if(!url.startsWith("file") && !url.startsWith("https://go.crisp.chat/chat/embed")) {
                     execute(url);
                     return false;
                 }
@@ -130,7 +131,7 @@ public class Crisp {
         cmp.addBrowserNavigationCallback(new BrowserNavigationCallback() {
             @Override
             public boolean shouldNavigate(String url) {
-                if(!url.startsWith("file")) {
+                if(!url.startsWith("file") && !url.startsWith("https://go.crisp.chat/chat/embed")) {
                     execute(url);
                     return false;
                 }
