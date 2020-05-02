@@ -31,6 +31,7 @@ import com.codename1.ui.BrowserComponent;
 import com.codename1.ui.FontImage;
 import com.codename1.ui.Form;
 import static com.codename1.ui.CN.*;
+import com.codename1.ui.Command;
 import com.codename1.ui.Toolbar;
 import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.events.ActionListener;
@@ -58,7 +59,16 @@ public class Crisp {
             tokenId = websiteId + System.currentTimeMillis();
             Preferences.set("crisp-token-id", tokenId);
         }
-        chatForm = new Form(new BorderLayout());
+        chatForm = new Form(new BorderLayout()) {
+            @Override
+            protected void initGlobalToolbar() {
+                if(Toolbar.isGlobalToolbar()) {
+                    Toolbar tb = new Toolbar(true);
+                    tb.setUIID("Container");
+                    setToolbar(tb);
+                }
+            }
+        };
 
         String w = getProperty("BrowserComponent.useWKWebView", null);
         setProperty("BrowserComponent.useWKWebView", "true");
@@ -83,8 +93,13 @@ public class Crisp {
             }
         });
         chatForm.add(CENTER, cmp);
-        chatForm.getToolbar().setBackCommand("", Toolbar.BackCommandPolicy.AS_ARROW,
-            e ->  previousForm.showBack());
+        chatForm.setBackCommand(new Command("") {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                previousForm.showBack();
+            }
+        });
+        chatForm.getToolbar().addMaterialCommandToRightBar("", FontImage.MATERIAL_CLOSE, e -> previousForm.showBack());
         setProperty("BrowserComponent.useWKWebView", w);
     }
 
